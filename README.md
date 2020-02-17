@@ -22,4 +22,5 @@ List of parameters for the script:
 - g => gpu (in integer numbers) quota for a user (defaults to 0)
 
 **Removing Tenant**
+
 Simply delete the namespace that you created for the tenant => kubectl delete ns <namespace>
