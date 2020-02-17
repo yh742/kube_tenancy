@@ -20,3 +20,6 @@ List of parameters for the script:
 - e => ephemeral storage (in Gibibytes) quota for user; this is storage typically used by container as it grows
 - s => storage (in GibiBytes) quota for user; this is storage claimed by persistent volume claims
 - g => gpu (in integer numbers) quota for a user (defaults to 0)
+
+**Removing Tenant**
+Simply delete the namespace that you created for the tenant => kubectl delete ns <namespace>
