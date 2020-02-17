@@ -12,6 +12,9 @@ metadata:
   name: ${namespace}-user
   namespace: ${namespace}
 rules:
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["*"]
 - apiGroups: ["extensions", "apps"]
   resources: ["*"]
   verbs: ["*"]
@@ -44,7 +47,6 @@ rules:
   - serviceaccounts
   - serviceaccounts/token
   - services
-  - services/proxy
   - services/status
   verbs: ["*"]
 

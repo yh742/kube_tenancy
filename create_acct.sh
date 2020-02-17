@@ -30,6 +30,7 @@ print_error() {
     exit 1
 }
 
+admin=''
 namespace=''
 overwrite=false
 cpu=''
@@ -37,8 +38,11 @@ memory=''
 ephemeral=''
 storage=''
 gpu=0
-while getopts "n:hoc:m:e:s:g:" opt; do
+while getopts "n:haoc:m:e:s:g:" opt; do
     case $opt in
+    a)
+        admin=true
+        ;;
     c)
         cpu=$OPTARG
         ;;
@@ -83,24 +87,27 @@ then
     print_error "Must specify -n to create namespace!"
 fi
 
-if [ -z $cpu ] 
-then
-    print_error "Must specify -c for vcpu quota!"
-fi  
+if [ -z $admin ]
+then 
+    if [ -z $cpu ] 
+    then
+        print_error "Must specify -c for vcpu quota!"
+    fi  
 
-if [ -z $memory ] 
-then
-    print_error "Must specify -m for memory (Gibibyte) quota!"
-fi
+    if [ -z $memory ] 
+    then
+        print_error "Must specify -m for memory (Gibibyte) quota!"
+    fi
 
-if [ -z $ephemeral ] 
-then
-    print_error "Must specify -e for ephemeral storage (Gibibyte) quota!"
-fi 
+    if [ -z $ephemeral ] 
+    then
+        print_error "Must specify -e for ephemeral storage (Gibibyte) quota!"
+    fi 
 
-if [ -z $storage ] 
-then
-    print_error "Must specify -e for number of storage (Gibibyte)!"
+    if [ -z $storage ] 
+    then
+        print_error "Must specify -e for number of storage (Gibibyte)!"
+    fi 
 fi 
 
 kubectl get ns --all-namespaces | grep -i $namespace > /dev/null
@@ -131,24 +138,50 @@ echo "Ephemeral Storage Quota: $ephemeral"
 echo "Storage Quota: $storage"
 echo "GPU Quota: $gpu"
 
+kubectl get clusterrole "$namespace"-user 2>/dev/null
+if [ $? -eq 0 ]
+then
+    kubectl delete clusterrole "$namespace"-user 
+fi
+
+kubectl get clusterrolebinding "$namespace"-user-view 2>/dev/null
+if [ $? -eq 0 ]
+then
+    kubectl delete clusterrolebinding "$namespace"-user-view
+fi
+
 # Step 1: Create namespace based on template
+namespace_template='namespace'
+if ! [ -z $admin ]
+then
+    namespace_template="$namespace_template"-admin
+fi
 kubectl create ns $namespace
 cat << EOF | kubectl apply -f -
-$(sed "s/\${namespace}/$namespace/g" ./templates/namespace.yaml)
+$(sed "s/\${namespace}/$namespace/g" ./templates/"$namespace_template".yaml)
 EOF
 
 # Step 2: Create config file from token
-token_name=$(kubectl get secrets --no-headers -n $namespace -o custom-columns=":metadata.name" | grep -i $namespace-user)
+token_name=$(kubectl get secrets --no-headers -n $namespace -o custom-columns=":metadata.name" | grep -i "$namespace"-tenant)
+if [ -z $token_name ]
+then
+    print_error "token is missing"
+fi
 echo "$token_name found!"
 token=$(kubectl get secret $token_name -n $namespace -o "jsonpath={.data.token}" | base64 --decode)
 cert=$(kubectl get secret $token_name -n $namespace -o "jsonpath={.data['ca\.crt']}")
 apiserver=$(kubectl config view --minify | grep server | cut -f 2- -d ":" | tr -d " ")
-sed "s/\${namespace}/$namespace/g;s/\${certificate}/$cert/g;s/\${token}/$token/g;s,\${apiserver},$apiserver,g;" ./templates/config > config
+sed "s/\${namespace}/$namespace/g;s/\${certificate}/$cert/g;s/\${token}/$token/g;s,\${apiserver},$apiserver,g;" ./templates/config > "$namespace"_config
 
 # Step 3: Create network policies
 cat << EOF | kubectl apply -f -
 $(sed "s/\${namespace}/$namespace/g" ./templates/networkpolicy.yaml)
 EOF
+
+if ! [ -z $admin ]
+then
+    exit
+fi
 
 # Step 4: Create default resources
 cat << EOF | kubectl apply -f -

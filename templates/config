@@ -11,7 +11,7 @@ clusters:
 
 # Define the user
 users:
-- name: ${namespace}-user
+- name: ${namespace}-tenant
   user:
     as-user-extra: {}
     client-key-data: ${certificate}
@@ -22,7 +22,7 @@ contexts:
 - context:
     cluster: vzmcity-cluster
     namespace: ${namespace}
-    user: ${namespace}-user
+    user: ${namespace}-tenant
   name: vzmcity
 
 # Define current context
