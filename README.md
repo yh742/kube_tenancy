@@ -13,7 +13,8 @@ This will overwrite any old namespaces while creating a quota of:
 *10 vcpu, 20Gi memory, 50Gi ephemeral storage, 100Gi persistent storage, 1 gpu*
 
 List of parameters for the script:
-- o => overwrite existing namespace (no arguments); if namespace exists, you will be prompted otherwise
+- o => (no arguments) overwrites existing namespace; if namespace exists, you will be prompted otherwise
+- a => (no arguments) creates admin profile ; no quotas or defaults
 - n => namespace for user
 - c => vcpu quota for user
 - m => memory (in Gibibytes) quota for user
