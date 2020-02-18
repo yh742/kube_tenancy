@@ -1,5 +1,4 @@
-#!/bin/bash
-# usage ./create_acct 
+#!/usr/bin/env bash
 
 print_usage() {
     echo "Script performs the following: "
@@ -8,11 +7,12 @@ print_usage() {
     echo "(3) Creates network policy for namespace (e.g. deny all inbound calls)"
     echo "(4) Creates resource quotas for namespaces"
     echo "Usage example: "
-    ehco "./create_acct.sh -o -n mynamespace -c 10 -m 20 -e 50 -s 100 -g 1"
+    echo "./create_acct.sh -o -n mynamespace -c 10 -m 20 -e 50 -s 100 -g 1"
     echo "This will overwrite any old namespaces while creating a quota of: "
     echo "10 vcpu, 20Gi memory, 50Gi ephemeral storage, 100Gi persistent storage, 1 gpu"
     echo "Please specify the following parmaters: "
-    echo "-o => overwrite existing namespace (no arguments)"
+    echo "-o => (no arguments) overwrite existing namespace"
+    echo "-a => (no arguments) creates admin profile (no defaults or quotas)"
     echo "-n => namespace for user"
     echo "-c => vcpu quota for user"
     echo "-m => memory (in Gibibytes) quota for user"
