@@ -3,12 +3,12 @@ kind: Service
 metadata:
   name: nginx
 spec:
-  externalTrafficPolicy: Local
-  type: LoadBalancer
-  #type: NodePort
+  #externalTrafficPolicy: Local
+  #type: LoadBalancer
+  type: NodePort
   selector:
     app: nginx
   ports:
   - targetPort: 80
-    port: 32142
+    port: 80
     name: http
