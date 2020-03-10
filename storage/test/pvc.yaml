@@ -7,5 +7,5 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 18G
+      storage: 22G
   storageClassName: fast-disks
