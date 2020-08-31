@@ -1,6 +1,0 @@
-Local static provisioning only works when you have mount points for watcher to watch.
-You woul have to bind mount every time for someone to use volumes. This is not usable...
-
-OpenEBS doesn't support disk quota when over allocating storage space
-
-
